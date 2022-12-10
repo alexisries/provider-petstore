@@ -1,7 +1,9 @@
 # ====================================================================================
 # Setup Project
 PROJECT_NAME := provider-petstore
-PROJECT_REPO := github.com/crossplane/$(PROJECT_NAME)
+PROJECT_REPO := github.com/alexisries/$(PROJECT_NAME)
+
+GOLANGCILINT_VERSION := 1.50.0
 
 PLATFORMS ?= linux_amd64 linux_arm64
 -include build/makelib/common.mk
