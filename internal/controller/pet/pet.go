@@ -38,7 +38,7 @@ import (
 )
 
 const (
-	errNotPet    = "managed resource is not a Pet custom resource"
+	errNotPet       = "managed resource is not a Pet custom resource"
 	errTrackPCUsage = "cannot track ProviderConfig usage"
 	errGetPC        = "cannot get ProviderConfig"
 	errGetCreds     = "cannot get credentials"
