@@ -124,6 +124,11 @@ linters:
 issues:
   # Excluding configuration per-path and per-linter
   exclude-rules:
+    - linters:
+        - errcheck
+      text: Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*print(f|ln)?|os\.(Un)?Setenv). is not checked
+
+
     # Exclude some linters from running on tests files.
     - path: _test\.go
       text: "Using the variable on range scope `tc` in function literal"
