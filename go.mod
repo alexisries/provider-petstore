@@ -1,4 +1,4 @@
-module github.com/crossplane/provider-petstore
+module github.com/alexisries/provider-petstore
 
 go 1.19
 

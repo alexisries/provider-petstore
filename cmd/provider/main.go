@@ -36,10 +36,10 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/ratelimiter"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
-	"github.com/crossplane/provider-petstore/apis"
-	"github.com/crossplane/provider-petstore/apis/v1alpha1"
-	petstore "github.com/crossplane/provider-petstore/internal/controller"
-	"github.com/crossplane/provider-petstore/internal/controller/features"
+	"github.com/alexisries/provider-petstore/apis"
+	"github.com/alexisries/provider-petstore/apis/v1alpha1"
+	petstore "github.com/alexisries/provider-petstore/internal/controller"
+	"github.com/alexisries/provider-petstore/internal/controller/features"
 )
 
 func main() {
