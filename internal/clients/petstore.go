@@ -106,3 +106,13 @@ func (c *Client) DoRequest(path string, method string, body []byte) (*http.Respo
 	}
 	return res, nil
 }
+
+// String returns a pointer value for the string value passed in.
+func String(v string) *string {
+	return &v
+}
+
+// Int64 returns a pointer value for the int64 value passed in.
+func Int64(v int64) *int64 {
+	return &v
+}

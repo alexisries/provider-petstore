@@ -25,14 +25,49 @@ import (
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
-// PetParameters are the configurable fields of a Pet.
-type PetParameters struct {
-	ConfigurableField string `json:"configurableField"`
+type PetCategory struct {
+	// The id of the pet category
+	Id int64 `json:"id"`
+
+	// The name of the pet category
+	Name string `json:"name"`
 }
 
-// PetObservation are the observable fields of a Pet.
+type PetTag struct {
+	// The id of the pet tag
+	Id int64 `json:"id"`
+
+	// The name of the pet tag
+	Name string `json:"name"`
+}
+
+// PetParameters define the desired state of an pet
+type PetParameters struct {
+	// The name of the Pet
+	// +optional
+	Name string `json:"name,omitempty"`
+
+	// Category og the Pet
+	// +optional
+	Category *PetCategory `json:"category,omitempty"`
+
+	// List of the pet tags
+	// +optional
+	Tags []PetTag `json:"tags,omitempty"`
+
+	// List of pet photos url
+	// +optional
+	PhotoUrls []string `json:"photosUrls,omitempty"`
+}
+
+// PetObservation keeps the state of external resource
 type PetObservation struct {
-	ObservableField string `json:"observableField,omitempty"`
+	// Id of the pet
+	Id int64 `json:"id,omitempty"`
+
+	// Status of the pet
+	// +kubebuilder:validation:Enum=AVAILABLE;INPROGRESS;INACTIVE;PENDING;FAILED
+	Status string `json:"status,omitempty"`
 }
 
 // A PetSpec defines the desired state of a Pet.

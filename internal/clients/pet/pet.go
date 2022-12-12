@@ -25,9 +25,6 @@ func GeneratePetStatus(pet *Pet) v1alpha1.PetObservation {
 }
 
 func IsPetUptodate(p v1alpha1.PetParameters, cd *Pet) bool {
-	tagsAdd, tagsRemove := DiffTags(p.Tags, *cd.Tags)
-	photosAdd, photosRemove := DiffPhotos(p.PhotoUrls, cd.PhotoUrls)
-
 	switch {
 	case p.Name != cd.Name:
 		return false
@@ -37,10 +34,38 @@ func IsPetUptodate(p v1alpha1.PetParameters, cd *Pet) bool {
 		(p.Category.Name != *cd.Category.Name ||
 			p.Category.Id != *cd.Category.Id):
 		return false
-	case len(tagsAdd) != 0 || len(tagsRemove) != 0:
+	case !IsTagsUptodate(p, cd):
 		return false
-	case len(photosAdd) != 0 || len(photosRemove) != 0:
+	case !IsPhotosUrlUptodate(p, cd):
 		return false
+	}
+	return true
+}
+
+func IsTagsUptodate(p v1alpha1.PetParameters, cd *Pet) bool {
+	if (p.Tags != nil && cd.Tags == nil) ||
+		(p.Tags == nil && cd.Tags != nil) {
+		return false
+	}
+	if p.Tags != nil && cd.Tags != nil {
+		tagsAdd, tagsRemove := DiffTags(p.Tags, *cd.Tags)
+		if len(tagsAdd) != 0 || len(tagsRemove) != 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func IsPhotosUrlUptodate(p v1alpha1.PetParameters, cd *Pet) bool {
+	if (p.PhotoUrls != nil && cd.PhotoUrls == nil) ||
+		(p.PhotoUrls == nil && cd.PhotoUrls != nil) {
+		return false
+	}
+	if p.Tags != nil && cd.Tags != nil {
+		photosAdd, photosRemove := DiffPhotos(p.PhotoUrls, cd.PhotoUrls)
+		if len(photosAdd) != 0 || len(photosRemove) != 0 {
+			return false
+		}
 	}
 	return true
 }
@@ -87,10 +112,10 @@ func DiffTags(spec []v1alpha1.PetTag, current []Tag) (addTags []Tag, remove []Ta
 		removeMap[*t.Id] = *t.Name
 	}
 	for k, v := range addMap {
-		addTags = append(addTags, Tag{Id: &k, Name: &v})
+		addTags = append(addTags, Tag{Id: petstore.Int64(k), Name: petstore.String(v)})
 	}
 	for k, v := range removeMap {
-		remove = append(remove, Tag{Id: &k, Name: &v})
+		remove = append(remove, Tag{Id: petstore.Int64(k), Name: petstore.String(v)})
 	}
 	return
 }
