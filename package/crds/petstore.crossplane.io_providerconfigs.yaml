@@ -96,8 +96,11 @@ spec:
                 required:
                 - source
                 type: object
+              url:
+                type: string
             required:
             - credentials
+            - url
             type: object
           status:
             description: A ProviderConfigStatus reflects the observed state of a ProviderConfig.

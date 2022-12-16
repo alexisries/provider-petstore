@@ -62,12 +62,46 @@ spec:
                 - Delete
                 type: string
               forProvider:
-                description: PetParameters are the configurable fields of a Pet.
+                description: PetParameters define the desired state of an pet
                 properties:
-                  configurableField:
+                  category:
+                    description: Category og the Pet
+                    properties:
+                      id:
+                        description: The id of the pet category
+                        format: int64
+                        type: integer
+                      name:
+                        description: The name of the pet category
+                        type: string
+                    required:
+                    - id
+                    - name
+                    type: object
+                  name:
+                    description: The name of the Pet
                     type: string
-                required:
-                - configurableField
+                  photosUrls:
+                    description: List of pet photos url
+                    items:
+                      type: string
+                    type: array
+                  tags:
+                    description: List of the pet tags
+                    items:
+                      properties:
+                        id:
+                          description: The id of the pet tag
+                          format: int64
+                          type: integer
+                        name:
+                          description: The name of the pet tag
+                          type: string
+                      required:
+                      - id
+                      - name
+                      type: object
+                    type: array
                 type: object
               providerConfigRef:
                 default:
@@ -244,9 +278,20 @@ spec:
             description: A PetStatus represents the observed state of a Pet.
             properties:
               atProvider:
-                description: PetObservation are the observable fields of a Pet.
+                description: PetObservation keeps the state of external resource
                 properties:
-                  observableField:
+                  id:
+                    description: Id of the pet
+                    format: int64
+                    type: integer
+                  status:
+                    description: Status of the pet
+                    enum:
+                    - AVAILABLE
+                    - INPROGRESS
+                    - INACTIVE
+                    - PENDING
+                    - FAILED
                     type: string
                 type: object
               conditions:
