@@ -7,9 +7,9 @@ import (
 
 type Client interface {
 	AddPet(pet *Pet) (*Pet, error)
-	GetPetById(petId int64) (*Pet, error)
-	UpdatePetById(petId int64, pet *Pet) error
-	DeletePetById(petId int64) error
+	GetPetById(petId string) (*Pet, error)
+	UpdatePetById(petId string, pet *Pet) error
+	DeletePetById(petId string) error
 }
 
 func NewClient(cfg *petstore.Config) Client {

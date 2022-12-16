@@ -46,8 +46,9 @@ import (
 var (
 	unexpectedItem resource.Managed
 
-	petId   int64 = 565656
-	errBoom       = errors.New("Boom")
+	petIdInt int64 = 565656
+	petIdStr       = strconv.FormatInt(petIdInt, 10)
+	errBoom        = errors.New("Boom")
 )
 
 type petModifier func(*v1alpha1.Pet)
@@ -72,7 +73,7 @@ func withStatus(status string) petModifier {
 
 func newPet(m ...petModifier) *v1alpha1.Pet {
 	pt := &v1alpha1.Pet{}
-	meta.SetExternalName(pt, strconv.FormatInt(petId, 10))
+	meta.SetExternalName(pt, petIdStr)
 	for _, f := range m {
 		f(pt)
 	}
@@ -101,9 +102,9 @@ func TestObserve(t *testing.T) {
 		"ValidInput": {
 			args: args{
 				petc: &fake.MockPetClient{
-					MockGetPetById: func(petId int64) (*pet.Pet, error) {
+					MockGetPetById: func(petId string) (*pet.Pet, error) {
 						return &pet.Pet{
-							Id:     &petId,
+							Id:     &petIdInt,
 							Status: pet.PetStatusAvailable,
 						}, nil
 					},
@@ -111,7 +112,7 @@ func TestObserve(t *testing.T) {
 				mg: newPet(),
 			},
 			want: want{
-				mg: newPet(withId(petId), withStatus(string(pet.PetStatusAvailable))),
+				mg: newPet(withId(petIdInt), withStatus(string(pet.PetStatusAvailable))),
 				o: managed.ExternalObservation{
 					ResourceExists:   true,
 					ResourceUpToDate: true,
@@ -130,21 +131,21 @@ func TestObserve(t *testing.T) {
 		"ClientError": {
 			args: args{
 				petc: &fake.MockPetClient{
-					MockGetPetById: func(petId int64) (*pet.Pet, error) {
+					MockGetPetById: func(petId string) (*pet.Pet, error) {
 						return nil, errBoom
 					},
 				},
-				mg: newPet(withId(petId)),
+				mg: newPet(withId(petIdInt)),
 			},
 			want: want{
-				mg:  newPet(withId(petId)),
+				mg:  newPet(withId(petIdInt)),
 				err: errors.Wrap(errBoom, errGetPet),
 			},
 		},
 		"ResourceDoesNotExist": {
 			args: args{
 				petc: &fake.MockPetClient{
-					MockGetPetById: func(petId int64) (*pet.Pet, error) {
+					MockGetPetById: func(petId string) (*pet.Pet, error) {
 						return nil, &petstore.ResourceNotFoundException{}
 					},
 				},
@@ -197,7 +198,7 @@ func TestCreate(t *testing.T) {
 				petc: &fake.MockPetClient{
 					MockAddPet: func(petInput *pet.Pet) (*pet.Pet, error) {
 						return &pet.Pet{
-							Id:     &petId,
+							Id:     &petIdInt,
 							Status: pet.PetStatusPending,
 						}, nil
 					},

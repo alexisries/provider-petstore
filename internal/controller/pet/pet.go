@@ -19,7 +19,6 @@ package pet
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -140,12 +139,7 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		}, nil
 	}
 
-	externalNameInt, err := strconv.Atoi(meta.GetExternalName(cr))
-	if err != nil {
-		return managed.ExternalObservation{}, err
-	}
-
-	pet, err := c.service.GetPetById(int64(externalNameInt))
+	pet, err := c.service.GetPetById(meta.GetExternalName(cr))
 	if err != nil {
 		if petstore.IsErrorNotFound(err) {
 			return managed.ExternalObservation{ResourceExists: false}, nil

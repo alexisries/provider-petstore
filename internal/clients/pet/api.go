@@ -73,8 +73,8 @@ func (c *PetClient) AddPet(pet *Pet) (*Pet, error) {
 	return pet, nil
 }
 
-func (c *PetClient) GetPetById(petId int64) (*Pet, error) {
-	path := fmt.Sprintf("/pet/%d", petId)
+func (c *PetClient) GetPetById(petId string) (*Pet, error) {
+	path := fmt.Sprintf("/pet/%s", petId)
 	res, err := c.DoRequest(path, "GET", nil)
 	if err != nil {
 		return nil, err
@@ -88,9 +88,8 @@ func (c *PetClient) GetPetById(petId int64) (*Pet, error) {
 	return &pet, nil
 }
 
-func (c *PetClient) UpdatePetById(petId int64, pet *Pet) error {
-	path := fmt.Sprintf("/pet/%d", petId)
-
+func (c *PetClient) UpdatePetById(petId string, pet *Pet) error {
+	path := fmt.Sprintf("/pet/%s", petId)
 	body, err := json.Marshal(*pet)
 	if err != nil {
 		return err
@@ -102,8 +101,8 @@ func (c *PetClient) UpdatePetById(petId int64, pet *Pet) error {
 	return nil
 }
 
-func (c *PetClient) DeletePetById(petId int64) error {
-	path := fmt.Sprintf("/pet/%d", petId)
+func (c *PetClient) DeletePetById(petId string) error {
+	path := fmt.Sprintf("/pet/%s", petId)
 	_, err := c.DoRequest(path, "DELETE", nil)
 	if err != nil {
 		return err

@@ -7,23 +7,23 @@ var _ clientset.Client = (*MockPetClient)(nil)
 
 type MockPetClient struct {
 	MockAddPet        func(pet *clientset.Pet) (*clientset.Pet, error)
-	MockGetPetById    func(petId int64) (*clientset.Pet, error)
-	MockUpdatePetById func(petId int64, pet *clientset.Pet) error
-	MockDeletePetById func(petId int64) error
+	MockGetPetById    func(petId string) (*clientset.Pet, error)
+	MockUpdatePetById func(petId string, pet *clientset.Pet) error
+	MockDeletePetById func(petId string) error
 }
 
 func (m *MockPetClient) AddPet(pet *clientset.Pet) (*clientset.Pet, error) {
 	return m.MockAddPet(pet)
 }
 
-func (m *MockPetClient) GetPetById(petId int64) (*clientset.Pet, error) {
+func (m *MockPetClient) GetPetById(petId string) (*clientset.Pet, error) {
 	return m.MockGetPetById(petId)
 }
 
-func (m *MockPetClient) UpdatePetById(petId int64, pet *clientset.Pet) error {
+func (m *MockPetClient) UpdatePetById(petId string, pet *clientset.Pet) error {
 	return m.MockUpdatePetById(petId, pet)
 }
 
-func (m *MockPetClient) DeletePetById(petId int64) error {
+func (m *MockPetClient) DeletePetById(petId string) error {
 	return m.MockDeletePetById(petId)
 }
