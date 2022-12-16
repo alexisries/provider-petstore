@@ -45,6 +45,7 @@ const (
 	errNotPet       = "managed resource is not a Pet custom resource"
 	errGetPet       = "cannot get pet"
 	errCreatePet    = "cannot create pet"
+	errUpdatePet    = "cannot update pet"
 	errTrackPCUsage = "cannot track ProviderConfig usage"
 	errGetPC        = "cannot get ProviderConfig"
 	// errGetCreds     = "cannot get credentials"
@@ -131,8 +132,6 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		return managed.ExternalObservation{}, errors.New(errNotPet)
 	}
 
-	fmt.Printf("Observing: %+v", cr)
-
 	if meta.GetExternalName(cr) == "" {
 		return managed.ExternalObservation{
 			ResourceExists: false,
@@ -167,7 +166,6 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotPet)
 	}
-	fmt.Printf("Creating: %+v", cr)
 
 	pet, err := c.service.AddPet(petc.GeneratePet(cr.Spec.ForProvider))
 	if err != nil {
@@ -183,13 +181,13 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalUpdate{}, errors.New(errNotPet)
 	}
 
-	fmt.Printf("Updating: %+v", cr)
+	pet := petc.GeneratePet(cr.Spec.ForProvider)
+	err := c.service.UpdatePetById(meta.GetExternalName(cr), pet)
+	if err != nil {
+		return managed.ExternalUpdate{}, errors.Wrap(err, errUpdatePet)
+	}
 
-	return managed.ExternalUpdate{
-		// Optionally return any details that may be required to connect to the
-		// external resource. These will be stored as the connection secret.
-		ConnectionDetails: managed.ConnectionDetails{},
-	}, nil
+	return managed.ExternalUpdate{}, nil
 }
 
 func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
