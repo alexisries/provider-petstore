@@ -325,3 +325,88 @@ func TestUpdate(t *testing.T) {
 		})
 	}
 }
+
+func TestDelete(t *testing.T) {
+	type args struct {
+		petc pet.Client
+		ctx  context.Context
+		mg   resource.Managed
+	}
+
+	type want struct {
+		o   managed.ExternalUpdate
+		err error
+		mg  resource.Managed
+	}
+
+	cases := map[string]struct {
+		reason string
+		args   args
+		want   want
+		err    error
+	}{
+		"ValidInput": {
+			args: args{
+				petc: &fake.MockPetClient{
+					MockDeletePetById: func(petId string) error {
+						return nil
+					},
+				},
+				mg: newPet(),
+			},
+			want: want{
+				mg: newPet(),
+				o:  managed.ExternalUpdate{},
+			},
+		},
+		"InValidInput": {
+			args: args{
+				mg: unexpectedItem,
+			},
+			want: want{
+				mg:  unexpectedItem,
+				err: errors.New(errNotPet),
+			},
+		},
+		"ClientError": {
+			args: args{
+				petc: &fake.MockPetClient{
+					MockDeletePetById: func(petId string) error {
+						return errBoom
+					},
+				},
+				mg: newPet(withId(petIdInt)),
+			},
+			want: want{
+				mg:  newPet(withId(petIdInt)),
+				err: errors.Wrap(errBoom, errDeletePet),
+			},
+		},
+		"ResourceDoesNotExist": {
+			args: args{
+				petc: &fake.MockPetClient{
+					MockDeletePetById: func(petId string) error {
+						return &petstore.ResourceNotFoundException{}
+					},
+				},
+				mg: newPet(),
+			},
+			want: want{
+				mg: newPet(),
+			},
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			e := external{service: tc.args.petc}
+			err := e.Delete(tc.args.ctx, tc.args.mg)
+			if diff := cmp.Diff(tc.want.err, err, test.EquateErrors()); diff != "" {
+				t.Errorf("\n%s\ne.Observe(...): -want error, +got error:\n%s\n", tc.reason, diff)
+			}
+			if diff := cmp.Diff(tc.want.mg, tc.args.mg, test.EquateConditions()); diff != "" {
+				t.Errorf("r: -want, +got:\n%s", diff)
+			}
+		})
+	}
+}

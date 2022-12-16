@@ -46,6 +46,7 @@ const (
 	errGetPet       = "cannot get pet"
 	errCreatePet    = "cannot create pet"
 	errUpdatePet    = "cannot update pet"
+	errDeletePet    = "cannot delete pet"
 	errTrackPCUsage = "cannot track ProviderConfig usage"
 	errGetPC        = "cannot get ProviderConfig"
 	// errGetCreds     = "cannot get credentials"
@@ -196,7 +197,6 @@ func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
 		return errors.New(errNotPet)
 	}
 
-	fmt.Printf("Deleting: %+v", cr)
-
-	return nil
+	err := c.service.DeletePetById(meta.GetExternalName(cr))
+	return errors.Wrap(resource.Ignore(petstore.IsErrorNotFound, err), errDeletePet)
 }
