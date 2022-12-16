@@ -6,13 +6,13 @@ import clientset "github.com/alexisries/provider-petstore/internal/clients/pet"
 var _ clientset.Client = (*MockPetClient)(nil)
 
 type MockPetClient struct {
-	MockAddPet        func(pet *clientset.Pet) error
+	MockAddPet        func(pet *clientset.Pet) (*clientset.Pet, error)
 	MockGetPetById    func(petId int64) (*clientset.Pet, error)
 	MockUpdatePetById func(petId int64, pet *clientset.Pet) error
 	MockDeletePetById func(petId int64) error
 }
 
-func (m *MockPetClient) AddPet(pet *clientset.Pet) error {
+func (m *MockPetClient) AddPet(pet *clientset.Pet) (*clientset.Pet, error) {
 	return m.MockAddPet(pet)
 }
 

@@ -6,7 +6,7 @@ import (
 )
 
 type Client interface {
-	AddPet(pet *Pet) error
+	AddPet(pet *Pet) (*Pet, error)
 	GetPetById(petId int64) (*Pet, error)
 	UpdatePetById(petId int64, pet *Pet) error
 	DeletePetById(petId int64) error
@@ -22,6 +22,29 @@ func GeneratePetStatus(pet *Pet) v1alpha1.PetObservation {
 		Id:     *pet.Id,
 		Status: string(pet.Status),
 	}
+}
+
+func GeneratePet(p v1alpha1.PetParameters) *Pet {
+	tags := []Tag{}
+	for _, tag := range p.Tags {
+		localTag := tag
+		tags = append(tags, Tag{
+			Id:   &localTag.Id,
+			Name: &localTag.Name,
+		})
+	}
+	pet := &Pet{
+		Name:      p.Name,
+		Tags:      &tags,
+		PhotoUrls: append([]string{}, p.PhotoUrls...),
+	}
+	if p.Category != nil {
+		pet.Category = &Category{
+			Id:   &p.Category.Id,
+			Name: &p.Category.Name,
+		}
+	}
+	return pet
 }
 
 func IsPetUptodate(p v1alpha1.PetParameters, cd *Pet) bool {

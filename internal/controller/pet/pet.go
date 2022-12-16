@@ -45,6 +45,7 @@ const (
 	errSDK          = "empty pet returned from client"
 	errNotPet       = "managed resource is not a Pet custom resource"
 	errGetPet       = "cannot get pet"
+	errCreatePet    = "cannot create pet"
 	errTrackPCUsage = "cannot track ProviderConfig usage"
 	errGetPC        = "cannot get ProviderConfig"
 	// errGetCreds     = "cannot get credentials"
@@ -172,14 +173,14 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotPet)
 	}
-
 	fmt.Printf("Creating: %+v", cr)
 
-	return managed.ExternalCreation{
-		// Optionally return any details that may be required to connect to the
-		// external resource. These will be stored as the connection secret.
-		ConnectionDetails: managed.ConnectionDetails{},
-	}, nil
+	pet, err := c.service.AddPet(petc.GeneratePet(cr.Spec.ForProvider))
+	if err != nil {
+		return managed.ExternalCreation{}, errors.Wrap(err, errCreatePet)
+	}
+	meta.SetExternalName(cr, fmt.Sprint(*pet.Id))
+	return managed.ExternalCreation{}, nil
 }
 
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {

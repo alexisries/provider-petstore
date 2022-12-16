@@ -1,8 +1,10 @@
 package pet
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"math/big"
 
 	petstore "github.com/alexisries/provider-petstore/internal/clients"
 )
@@ -46,18 +48,29 @@ func New(cfg *petstore.Config) PetClient {
 	}
 }
 
-func (c *PetClient) AddPet(pet *Pet) error {
+func genRandNum(min, max int64) int64 {
+	bg := big.NewInt(max - min)
+	n, err := rand.Int(rand.Reader, bg)
+	if err != nil {
+		panic(err)
+	}
+	return n.Int64() + min
+}
+
+func (c *PetClient) AddPet(pet *Pet) (*Pet, error) {
+	randomInt := genRandNum(100000, 999999)
 	path := "/pet"
 	pet.Status = PetStatusPending
+	pet.Id = &randomInt
 	body, err := json.Marshal(*pet)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	_, err = c.DoRequest(path, "POST", body)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return pet, nil
 }
 
 func (c *PetClient) GetPetById(petId int64) (*Pet, error) {

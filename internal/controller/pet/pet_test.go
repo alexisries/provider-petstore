@@ -25,13 +25,14 @@ import (
 	petstore "github.com/alexisries/provider-petstore/internal/clients"
 	"github.com/alexisries/provider-petstore/internal/clients/pet"
 	"github.com/alexisries/provider-petstore/internal/clients/pet/fake"
-	"github.com/pkg/errors"
 
 	"github.com/crossplane/crossplane-runtime/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	"github.com/crossplane/crossplane-runtime/pkg/test"
+
 	"github.com/google/go-cmp/cmp"
+	"github.com/pkg/errors"
 )
 
 // Unlike many Kubernetes projects Crossplane does not use third party testing
@@ -159,6 +160,83 @@ func TestObserve(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			e := external{service: tc.args.petc}
 			got, err := e.Observe(tc.args.ctx, tc.args.mg)
+			if diff := cmp.Diff(tc.want.err, err, test.EquateErrors()); diff != "" {
+				t.Errorf("\n%s\ne.Observe(...): -want error, +got error:\n%s\n", tc.reason, diff)
+			}
+			if diff := cmp.Diff(tc.want.mg, tc.args.mg, test.EquateConditions()); diff != "" {
+				t.Errorf("r: -want, +got:\n%s", diff)
+			}
+			if diff := cmp.Diff(tc.want.o, got); diff != "" {
+				t.Errorf("\n%s\ne.Observe(...): -want, +got:\n%s\n", tc.reason, diff)
+			}
+		})
+	}
+}
+
+func TestCreate(t *testing.T) {
+	type args struct {
+		petc pet.Client
+		ctx  context.Context
+		mg   resource.Managed
+	}
+
+	type want struct {
+		o   managed.ExternalCreation
+		err error
+		mg  resource.Managed
+	}
+
+	cases := map[string]struct {
+		reason string
+		args   args
+		want   want
+		err    error
+	}{
+		"ValidInput": {
+			args: args{
+				petc: &fake.MockPetClient{
+					MockAddPet: func(petInput *pet.Pet) (*pet.Pet, error) {
+						return &pet.Pet{
+							Id:     &petId,
+							Status: pet.PetStatusPending,
+						}, nil
+					},
+				},
+				mg: newPet(),
+			},
+			want: want{
+				mg: newPet(),
+				o:  managed.ExternalCreation{},
+			},
+		},
+		"InValidInput": {
+			args: args{
+				mg: unexpectedItem,
+			},
+			want: want{
+				mg:  unexpectedItem,
+				err: errors.New(errNotPet),
+			},
+		},
+		"ClientError": {
+			args: args{
+				petc: &fake.MockPetClient{
+					MockAddPet: func(petInput *pet.Pet) (*pet.Pet, error) {
+						return nil, errBoom
+					},
+				},
+				mg: newPet(),
+			},
+			want: want{
+				mg:  newPet(),
+				err: errors.Wrap(errBoom, errCreatePet),
+			},
+		},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			e := external{service: tc.args.petc}
+			got, err := e.Create(tc.args.ctx, tc.args.mg)
 			if diff := cmp.Diff(tc.want.err, err, test.EquateErrors()); diff != "" {
 				t.Errorf("\n%s\ne.Observe(...): -want error, +got error:\n%s\n", tc.reason, diff)
 			}
